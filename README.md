@@ -4,3 +4,6 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Ogeeon_java-project-72&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Ogeeon_java-project-72)
 ### About
 This project is a website for analyzing web pages.
+
+### Deployed application
+Live version available [here](https://java-project-72-wqbs.onrender.com/)
