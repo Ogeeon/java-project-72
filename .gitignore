@@ -9,3 +9,4 @@ app/.idea
 app/gradlew.bat
 app/build
 app/jte-classes
+app/.vscode
