@@ -9,13 +9,15 @@ import lombok.Setter;
 @Getter
 public class Url {
     @Setter
-    private long id;
-    private String name;
-    private String url;
+    private Long id;
+    private String pageUrl;
     private LocalDateTime createdAt;
 
-    public Url(String name, String url) {
-        this.name = name;
-        this.url = url;
+    public Url(String pageUrl) {
+        this.pageUrl = pageUrl;
+    }
+    public Url(String pageUrl, LocalDateTime createdAt) {
+        this.pageUrl = pageUrl;
+        this.createdAt = createdAt;
     }
 }

@@ -13,53 +13,72 @@ import com.zaxxer.hikari.HikariDataSource;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.controller.UrlController;
+import hexlet.code.dto.MainPage;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
 import io.javalin.rendering.template.JavalinJte;
 import lombok.extern.slf4j.Slf4j;
+
+import static io.javalin.rendering.template.TemplateUtil.model;
 
 @Slf4j
 public class App {
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
-        log.info("App started, listening on port " + port);
         return Integer.parseInt(port);
+    }
+
+    private static String getJdbcUrl() {
+        return System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
     }
 
     private static String readResourceFile(String fileName) throws IOException {
         var inputStream = App.class.getClassLoader().getResourceAsStream(fileName);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            return reader.lines().collect(Collectors.joining("\n"));
+        if (inputStream != null) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
+                return reader.lines().collect(Collectors.joining("\n"));
+            }
+        } else {
+            log.error("Failed to access {}", fileName);
+            return null;
         }
     }
     
     private static TemplateEngine createTemplateEngine() {
         ClassLoader classLoader = App.class.getClassLoader();
         ResourceCodeResolver codeResolver = new ResourceCodeResolver("templates", classLoader);
-        TemplateEngine templateEngine = TemplateEngine.create(codeResolver, ContentType.Html);
-        return templateEngine;
+        return TemplateEngine.create(codeResolver, ContentType.Html);
     }
 
     public static void main(String[] args) throws IOException, SQLException {
         var app = getApp();
-
-        app.start(getPort());
+        var port = getPort();
+        app.start(port);
+        log.info("Application started, listening on port {}", port);
     }
 
     public static Javalin getApp() throws IOException, SQLException {
-        String jdbcUrl = System.getenv().getOrDefault("JDBC_DATABASE_URL", "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;");
         var hikariConfig = new HikariConfig();
-        hikariConfig.setJdbcUrl(jdbcUrl);
+        hikariConfig.setJdbcUrl(getJdbcUrl());
 
         var dataSource = new HikariDataSource(hikariConfig);
-        var sql = readResourceFile("schema.sql");
-
-        log.info(sql);
-        try (var connection = dataSource.getConnection();
-             var statement = connection.createStatement()) {
-            statement.execute(sql);
+        // There won't be this env variable locally. It can be set to "true" on Render if needed.
+        if (System.getenv().getOrDefault("RECREATE_SCHEMA", "true").equalsIgnoreCase("true")) {
+            var sql = readResourceFile("schema.sql");
+            if (sql != null) {
+                log.info("Running recreate schema script:\n{}", sql);
+                try (var connection = dataSource.getConnection();
+                     var statement = connection.createStatement()) {
+                    statement.execute(sql);
+                }
+            } else {
+                log.error("Failed to read schema.sql");
+            }
         }
+
         BaseRepository.setDataSource(dataSource);
 
         var app = Javalin.create(config -> {
@@ -67,7 +86,17 @@ public class App {
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
-        app.get("/", ctx -> ctx.render("index.html"));
+        app.get(NamedRoutes.rootPath(),ctx -> {
+            var page = new MainPage();
+            ctx.render("index.jte", model(
+                "page", page,
+                "flash", ctx.consumeSessionAttribute("flash"),
+                "flashType", ctx.consumeSessionAttribute("flashType")
+            ));
+        });
+        app.post(NamedRoutes.urlsPath(), UrlController::create);
+        app.get(NamedRoutes.urlsPath(), UrlController::index);
+        app.get(NamedRoutes.urlPath("{id}"), UrlController::show);
 
         return app;
     }

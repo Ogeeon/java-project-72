@@ -3,7 +3,6 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     application
-    java
     jacoco
     id("com.github.ben-manes.versions") version "0.50.0"
     id("org.sonarqube") version "7.0.1.6134"
@@ -33,7 +32,6 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
 
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.0")
 
