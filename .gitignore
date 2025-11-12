@@ -9,3 +9,7 @@ app/gradlew.bat
 app/build
 app/jte-classes
 app/.vscode
+app/.sonarlint/connectedMode.json
+app/.github/instructions/sonarqube_mcp.instructions.md
+app/.github/copilot-instructions.md
+app/.github/chatmodes/Code Reviewer.chatmode.md
