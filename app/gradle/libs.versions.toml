@@ -1,0 +1,36 @@
+[versions]
+
+postgres = "42.7.8"
+h2 = "2.4.240"
+hikari = "7.0.2"
+slf4j = "2.0.17"
+jte = "3.2.1"
+javalin = "6.6.0"
+assertj = "3.27.3"
+junit = "6.0.1"
+lombok = "1.18.42"
+benManes = "0.53.0"
+sonarqube = "7.0.1.6134"
+shadow = "8.1.1"
+
+
+[libraries]
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+slf4jSimple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
+jte = { module = "gg.jte:jte", version.ref = "jte" }
+javalin = { module = "io.javalin:javalin", version.ref = "javalin" }
+javalinBundle = { module = "io.javalin:javalin-bundle", version.ref = "javalin" }
+javalinRendering = { module = "io.javalin:javalin-rendering", version.ref = "javalin" }
+assertjCore = { module = "org.assertj:assertj-core", version.ref = "assertj" }
+junitBom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junitJupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
+junitPlatformLauncher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit" }
+junitJupiterEngine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
+
+[plugins]
+benManes = { id = "com.github.ben-manes.versions", version.ref = "benManes" }
+sonarqube = { id = "org.sonarqube", version.ref = "sonarqube" }
+shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }

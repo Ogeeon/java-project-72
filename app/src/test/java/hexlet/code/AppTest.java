@@ -12,18 +12,19 @@ import hexlet.code.repository.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
 
-public class AppTest {
+class AppTest {
 
     private Javalin app;
 
     @BeforeEach
-    public final void setUp() throws IOException, SQLException {
+    @SuppressWarnings("unused")
+    void setUp() throws IOException, SQLException {
         app = App.getApp();
         UrlRepository.removeAll();
     }
 
     @Test
-    public void testMainPage() {
+    void testMainPage() {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/");
             assertThat(response.code()).isEqualTo(200);
@@ -36,7 +37,7 @@ public class AppTest {
     }
 
     @Test
-    public void testUrlsPage() {
+    void testUrlsPage() {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/urls");
             assertThat(response.code()).isEqualTo(200);
@@ -44,7 +45,7 @@ public class AppTest {
     }
 
     @Test
-    public void testUrlPage() {
+    void testUrlPage() {
         JavalinTest.test(app, (server, client) -> {
             var url = new Url("https://ru.hexlet.io/");
             UrlRepository.save(url);
@@ -62,7 +63,7 @@ public class AppTest {
     }
 
     @Test
-    public void testCreateUrl() {
+    void testCreateUrl() {
         JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://example.com";
             var response = client.post("/urls", requestBody);

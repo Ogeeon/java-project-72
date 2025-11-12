@@ -4,9 +4,9 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     application
     jacoco
-    id("com.github.ben-manes.versions") version "0.53.0"
-    id("org.sonarqube") version "7.0.1.6134"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    alias(libs.plugins.benManes)
+    alias(libs.plugins.sonarqube)
+    alias(libs.plugins.shadow)
 }
 
 group = "hexlet.code"
@@ -21,27 +21,27 @@ repositories {
 }
 
 dependencies {
-    implementation("org.postgresql:postgresql:42.7.8")
-    implementation("com.h2database:h2:2.4.240")
-    implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.slf4j:slf4j-simple:2.0.17")
-    implementation("gg.jte:jte:3.2.1")
-    implementation("io.javalin:javalin:6.6.0")
-    implementation("io.javalin:javalin-bundle:6.6.0")
-    implementation("io.javalin:javalin-rendering:6.6.0")
+    implementation(libs.postgresql)
+    implementation(libs.h2)
+    implementation(libs.hikari)
+    implementation(libs.slf4jSimple)
+    implementation(libs.jte)
+    implementation(libs.javalin)
+    implementation(libs.javalinBundle)
+    implementation(libs.javalinRendering)
 
-    testImplementation("org.assertj:assertj-core:3.27.3")
-    testImplementation(platform("org.junit:junit-bom:6.0.1"))
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation(libs.assertjCore)
+    testImplementation(platform(libs.junitBom))
+    testImplementation(libs.junitJupiter)
+    testRuntimeOnly(libs.junitPlatformLauncher)
 
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:6.0.1")
+    testRuntimeOnly(libs.junitJupiterEngine)
 
-    compileOnly("org.projectlombok:lombok:1.18.42")
-    annotationProcessor("org.projectlombok:lombok:1.18.42")
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 
-    testCompileOnly("org.projectlombok:lombok:1.18.42")
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.42")
+    testCompileOnly(libs.lombok)
+    testAnnotationProcessor(libs.lombok)
 }
 
 tasks.test {
