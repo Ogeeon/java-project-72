@@ -124,18 +124,4 @@ public class UrlController {
             ctx.redirect(NamedRoutes.urlsPath());
         }
     }
-
-    public static void removeAll(Context ctx) {
-        try {
-            UrlRepository.removeAll();
-            ctx.sessionAttribute(ATTR_FLASH, "Все страницы успешно удалены");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.SUCCESS);
-            ctx.redirect(NamedRoutes.urlsPath());
-        } catch (SQLException e) {
-            log.error("SQL exception on removing all urls: {}", e.getMessage());
-            ctx.sessionAttribute(ATTR_FLASH, "Произошла ошибка при удалении страниц");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-            ctx.redirect(NamedRoutes.urlsPath());
-        }
-    }
 }

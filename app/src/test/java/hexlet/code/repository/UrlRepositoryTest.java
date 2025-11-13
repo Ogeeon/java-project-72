@@ -1,6 +1,7 @@
 package hexlet.code.repository;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -16,6 +17,17 @@ class UrlRepositoryTest {
     void setUp() throws IOException, SQLException {
         App.getApp();
         UrlRepository.removeAll();
+    }
+
+    @Test
+    void testInstantiation() throws NoSuchMethodException {
+        var constructor = UrlRepository.class.getDeclaredConstructor();
+        constructor.setAccessible(true);
+
+        assertThatThrownBy(constructor::newInstance)
+            .isInstanceOf(InvocationTargetException.class)
+            .hasCauseInstanceOf(UnsupportedOperationException.class)
+            .withFailMessage("UrlRepository should not be instantiable");
     }
 
     @Test

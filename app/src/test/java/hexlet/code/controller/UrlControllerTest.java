@@ -23,7 +23,19 @@ class UrlControllerTest {
         UrlRepository.removeAll();
     }
 
-        @Test
+    @Test
+    void testInstantiationException() {
+        try {
+            var constructor = UrlController.class.getDeclaredConstructor();
+            constructor.setAccessible(true);
+            constructor.newInstance();
+        } catch (Exception e) {
+            assertThat(e.getCause()).isInstanceOf(UnsupportedOperationException.class)
+                .hasMessage("Utility class");
+        }
+    }
+    
+    @Test
     void testMainPage() {
         JavalinTest.test(app, (server, client) -> {
             var response = client.get("/");
