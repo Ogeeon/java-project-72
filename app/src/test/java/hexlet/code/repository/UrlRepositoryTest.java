@@ -23,11 +23,9 @@ class UrlRepositoryTest {
     void testInstantiation() throws NoSuchMethodException {
         var constructor = UrlRepository.class.getDeclaredConstructor();
         constructor.setAccessible(true);
-
         assertThatThrownBy(constructor::newInstance)
             .isInstanceOf(InvocationTargetException.class)
-            .hasCauseInstanceOf(UnsupportedOperationException.class)
-            .withFailMessage("UrlRepository should not be instantiable");
+            .hasCauseInstanceOf(UnsupportedOperationException.class);
     }
 
     @Test

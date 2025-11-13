@@ -48,8 +48,8 @@ public class UrlController {
             var page = new MainPage();
             ctx.render(MAIN_PAGE_JTE, model(
                 "page", page,
-                "flash", "Некорректный URL",
-                "flashType", FlashType.ERROR)
+                ATTR_FLASH, "Некорректный URL",
+                ATTR_FLASH_TYPE, FlashType.ERROR)
             );
             return;
         }
@@ -59,8 +59,8 @@ public class UrlController {
                 var page = new MainPage();
                 ctx.render(MAIN_PAGE_JTE, model(
                     "page", page,
-                    "flash", "Страница уже существует",
-                    "flashType", FlashType.ERROR)
+                    ATTR_FLASH, "Страница уже существует",
+                    ATTR_FLASH_TYPE, FlashType.ERROR)
                 );
             } else {
                 var urlObj = new Url(pageUrl);
@@ -68,8 +68,8 @@ public class UrlController {
                 var page = new MainPage();
                 ctx.render(MAIN_PAGE_JTE, model(
                     "page", page,
-                    "flash", "Страница успешно добавлена",
-                    "flashType", FlashType.SUCCESS)
+                    ATTR_FLASH, "Страница успешно добавлена",
+                    ATTR_FLASH_TYPE, FlashType.SUCCESS)
                 );
             }
         } catch (SQLException e) {
