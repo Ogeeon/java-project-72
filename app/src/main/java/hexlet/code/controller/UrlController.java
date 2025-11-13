@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.sql.SQLException;
 
 import hexlet.code.dto.BasePage;
+import hexlet.code.dto.MainPage;
 import hexlet.code.dto.UrlPage;
 import hexlet.code.dto.UrlsPage;
 import hexlet.code.model.Url;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class UrlController {
+    private static final String MAIN_PAGE_JTE = "index.jte";
     private static final String URLS_PAGE_JTE = "urls/index.jte";
     private static final String URL_PAGE_JTE = "urls/show.jte";
     private static final String ATTR_FLASH = "flash";
@@ -33,7 +35,7 @@ public class UrlController {
             return String.format("%s://%s%s", urlObj.getProtocol(),
                     urlObj.getHost().toLowerCase(),
                     (urlObj.getPort() == -1 ? "" : ":" + urlObj.getPort()));
-        } catch (NullPointerException | MalformedURLException | URISyntaxException e) {
+        } catch (NullPointerException | MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             log.info("Incorrect url passed: {}", input);
             return null;
         }
@@ -43,25 +45,32 @@ public class UrlController {
         var urlParam  = ctx.formParam("url");
         String pageUrl = getUrlFromString(urlParam);
         if (pageUrl == null) {
-            ctx.sessionAttribute(ATTR_FLASH, "Некорректный URL");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-            ctx.status(422);
-            ctx.redirect(NamedRoutes.rootPath());
+            var page = new MainPage();
+            ctx.render(MAIN_PAGE_JTE, model(
+                "page", page,
+                "flash", "Некорректный URL",
+                "flashType", FlashType.ERROR)
+            );
             return;
         }
 
         try {
             if (UrlRepository.pageUrlExists(pageUrl)) {
-                ctx.sessionAttribute(ATTR_FLASH, "Страница уже существует");
-                ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-                ctx.status(422);
-                ctx.redirect(NamedRoutes.rootPath());
+                var page = new MainPage();
+                ctx.render(MAIN_PAGE_JTE, model(
+                    "page", page,
+                    "flash", "Страница уже существует",
+                    "flashType", FlashType.ERROR)
+                );
             } else {
                 var urlObj = new Url(pageUrl);
                 UrlRepository.save(urlObj);
-                ctx.sessionAttribute(ATTR_FLASH, "Страница успешно добавлена");
-                ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.SUCCESS);
-                ctx.redirect(NamedRoutes.urlsPath());
+                var page = new MainPage();
+                ctx.render(MAIN_PAGE_JTE, model(
+                    "page", page,
+                    "flash", "Страница успешно добавлена",
+                    "flashType", FlashType.SUCCESS)
+                );
             }
         } catch (SQLException e) {
             log.error("SQL exception on saving url: {}", e.getMessage());
