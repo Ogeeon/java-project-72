@@ -55,7 +55,9 @@ public class App {
 
     public static void main(String[] args) throws IOException, SQLException {
         var app = getApp();
+        log.info("got app");
         var port = getPort();
+        log.info("got port");
         app.start(port);
         log.info("Application started, listening on port {}", port);
     }
@@ -97,6 +99,7 @@ public class App {
         app.post(NamedRoutes.urlsPath(), UrlController::create);
         app.get(NamedRoutes.urlsPath(), UrlController::index);
         app.get(NamedRoutes.urlPath("{id}"), UrlController::show);
+        app.post(NamedRoutes.checkPath("{id}"), UrlController::check);
 
         return app;
     }

@@ -5,12 +5,12 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.Setter;
 
-@Setter
 @Getter
 public class Url {
     @Setter
     private Long id;
-    private String pageUrl;
+    private final String pageUrl;
+    @Setter
     private LocalDateTime createdAt;
 
     public Url(String pageUrl) {

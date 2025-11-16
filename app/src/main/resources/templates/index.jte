@@ -16,7 +16,7 @@
                             <form action="${NamedRoutes.urlsPath()}" method="POST">
                                 <div class="input-group">
                                     <input type="text" class="form-control" id="urlInput" name="url" placeholder="Ссылка" required>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary">Добавить</button>
                                 </div>
                                 <div class="form-text">
                                     Например: https://example.com

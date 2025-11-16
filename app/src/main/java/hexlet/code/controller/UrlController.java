@@ -4,17 +4,24 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.MainPage;
 import hexlet.code.dto.UrlPage;
 import hexlet.code.dto.UrlsPage;
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
+import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
 import hexlet.code.util.FlashType;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.http.Context;
 import static io.javalin.rendering.template.TemplateUtil.model;
+
+import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -41,7 +48,7 @@ public class UrlController {
         }
     }
 
-    public static void create(Context ctx) {
+    public static void create(Context ctx) throws SQLException {
         var urlParam  = ctx.formParam("url");
         String pageUrl = getUrlFromString(urlParam);
         if (pageUrl == null) {
@@ -54,74 +61,85 @@ public class UrlController {
             return;
         }
 
-        try {
-            if (UrlRepository.pageUrlExists(pageUrl)) {
-                var page = new MainPage();
-                ctx.render(MAIN_PAGE_JTE, model(
-                    "page", page,
-                    ATTR_FLASH, "Страница уже существует",
-                    ATTR_FLASH_TYPE, FlashType.ERROR)
-                );
-            } else {
-                var urlObj = new Url(pageUrl);
-                UrlRepository.save(urlObj);
-                var page = new MainPage();
-                ctx.render(MAIN_PAGE_JTE, model(
-                    "page", page,
-                    ATTR_FLASH, "Страница успешно добавлена",
-                    ATTR_FLASH_TYPE, FlashType.SUCCESS)
-                );
-            }
-        } catch (SQLException e) {
-            log.error("SQL exception on saving url: {}", e.getMessage());
-            ctx.sessionAttribute(ATTR_FLASH, "Произошла ошибка при добавлении страницы");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-            ctx.redirect(NamedRoutes.rootPath());
-        }
-    }
-
-    public static void index(Context ctx) {
-        try {
-            var urls = UrlRepository.getEntities();
-            var page = new UrlsPage(urls);
-            ctx.render(URLS_PAGE_JTE, model(
+        if (UrlRepository.pageUrlExists(pageUrl)) {
+            var page = new MainPage();
+            ctx.render(MAIN_PAGE_JTE, model(
                 "page", page,
-                ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
-                ATTR_FLASH_TYPE, ctx.consumeSessionAttribute(ATTR_FLASH_TYPE)
-            ));
-        } catch (SQLException e) {
-            log.error("SQL exception on getting urls list: {}", e.getMessage());
-            ctx.sessionAttribute(ATTR_FLASH, "Произошла ошибка при получении списка страниц");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-            ctx.redirect(NamedRoutes.rootPath());
+                ATTR_FLASH, "Страница уже существует",
+                ATTR_FLASH_TYPE, FlashType.ERROR)
+            );
+        } else {
+            var urlObj = new Url(pageUrl);
+            UrlRepository.save(urlObj);
+            ctx.sessionAttribute(ATTR_FLASH, "Страница успешно добавлена");
+            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.SUCCESS);
+            log.debug("gonna redirect");
+            ctx.redirect(NamedRoutes.urlsPath());
         }
     }
 
-    public static void show(Context ctx) {
-        try {
-            var urlOpt = UrlRepository.find(Long.valueOf(ctx.pathParam("id")));
-            if (urlOpt.isEmpty()) {
-                var page = new BasePage();
-                ctx.status(404);
-                ctx.render("layout/page.jte", model(
+    public static void index(Context ctx) throws SQLException {
+        log.debug("in index");
+        var urls = UrlRepository.getEntities();
+        var page = new UrlsPage(urls);
+        ctx.render(URLS_PAGE_JTE, model(
+            "page", page,
+            ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
+            ATTR_FLASH_TYPE, ctx.consumeSessionAttribute(ATTR_FLASH_TYPE)
+        ));
+    }
+
+    public static void show(Context ctx) throws SQLException {
+        var urlOpt = UrlRepository.find(Long.valueOf(ctx.pathParam("id")));
+        if (urlOpt.isEmpty()) {
+            var page = new BasePage();
+            ctx.status(404);
+            ctx.render("layout/page.jte", model(
+                "page", page,
+                ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
+                ATTR_FLASH_TYPE, FlashType.ERROR
+            ));
+            return;
+        }
+        var checks = UrlCheckRepository.getEntitiesByUrlId(urlOpt.get().getId());
+        var page = new UrlPage(urlOpt.get(), checks);
+        ctx.render(URL_PAGE_JTE, model(
+            "page", page,
+            ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
+            ATTR_FLASH_TYPE, ctx.consumeSessionAttribute(ATTR_FLASH_TYPE),
+            "activeNav", NamedRoutes.urlsPath()
+        ));
+    }
+
+    public static void check(Context ctx) throws SQLException {
+        var urlId = Long.valueOf(ctx.pathParam("id"));
+        var urlOpt = UrlRepository.find(urlId);
+        if (urlOpt.isEmpty()) {
+            var page = new BasePage();
+            ctx.status(404);
+            ctx.render("layout/page.jte", model(
                     "page", page,
                     ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
                     ATTR_FLASH_TYPE, FlashType.ERROR
-                ));
-                return;
-            }
-            var page = new UrlPage(urlOpt.get());
-            ctx.render(URL_PAGE_JTE, model(
-                "page", page,
-                ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
-                ATTR_FLASH_TYPE, ctx.consumeSessionAttribute(ATTR_FLASH_TYPE),
-                "activeNav", NamedRoutes.urlsPath()
             ));
-        } catch (SQLException e) {
-            log.error("SQL exception on getting url by id [{}]: {}", ctx.pathParam("id"), e.getMessage());
-            ctx.sessionAttribute(ATTR_FLASH, "Произошла ошибка при получении страницы");
-            ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.ERROR);
-            ctx.redirect(NamedRoutes.urlsPath());
+            return;
         }
+        var url = urlOpt.get();
+        var requestStr = Unirest.get(url.getPageUrl()).asString();
+        var status = requestStr.getStatus();
+        var body = requestStr.getBody();
+        Pattern pattern = Pattern.compile("<h1.*?>(.*)</h1>", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(body);
+        var h1 = matcher.find() ? matcher.group(1) : "";
+        pattern = Pattern.compile("<title>(.*)</title>", Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(body);
+        var title = matcher.find() ? matcher.group(1) : "";
+        pattern = Pattern.compile("<meta name=\"description\" content=\"(.*)\"", Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(body);
+        var description = matcher.find() ? matcher.group(1) : "";
+
+        var check = new UrlCheck(status, title, h1, description, url.getId(), LocalDateTime.now());
+        UrlCheckRepository.save(check);
+        ctx.redirect(NamedRoutes.urlPath(urlId));
     }
 }

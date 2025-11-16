@@ -29,10 +29,12 @@ dependencies {
     implementation(libs.javalin)
     implementation(libs.javalinBundle)
     implementation(libs.javalinRendering)
+    implementation(libs.unirest)
 
     testImplementation(libs.assertjCore)
     testImplementation(platform(libs.junitBom))
     testImplementation(libs.junitJupiter)
+    testImplementation(libs.mockWebserver)
     testRuntimeOnly(libs.junitPlatformLauncher)
 
     testRuntimeOnly(libs.junitJupiterEngine)

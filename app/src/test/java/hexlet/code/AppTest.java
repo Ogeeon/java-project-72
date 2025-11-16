@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 class AppTest {
     @Test
-    void testReadResourceWithValidFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+    void testReadResourceWithValidFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         var method = App.class.getDeclaredMethod("readResourceFile", String.class);
         method.setAccessible(true);
         var content = (String) method.invoke(null, "schema.sql");
@@ -18,7 +18,7 @@ class AppTest {
     }
 
     @Test
-    void testReadResourceFileWithMissingFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, IOException {
+    void testReadResourceFileWithMissingFile() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         var method = App.class.getDeclaredMethod("readResourceFile", String.class);
         method.setAccessible(true);
         var content = (String) method.invoke(null, "nonexistent-file.txt");
