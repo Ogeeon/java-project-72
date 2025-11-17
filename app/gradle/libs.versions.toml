@@ -15,6 +15,7 @@ unirest = "4.5.1"
 mockWebserver = "5.3.0"
 okhttp = "5.3.0"
 okio = "3.16.2"
+jsoup = "1.21.2"
 
 [libraries]
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgres" }
@@ -35,6 +36,7 @@ unirest = { module = "com.konghq:unirest-java-core", version.ref = "unirest"}
 mockWebserver = { module = "com.squareup.okhttp3:mockwebserver3", version.ref = "mockWebserver"}
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 
 [plugins]
 benManes = { id = "com.github.ben-manes.versions", version.ref = "benManes" }

@@ -23,6 +23,7 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 
 import kong.unirest.core.Unirest;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
 
 @Slf4j
 public class UrlController {
@@ -126,16 +127,10 @@ public class UrlController {
         var requestStr = Unirest.get(url.getPageUrl()).asString();
         var status = requestStr.getStatus();
         var body = requestStr.getBody();
-        Pattern pattern = Pattern.compile("<h1[^>]*>([^<]*)</h1>", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(body);
-        var h1 = matcher.find() ? matcher.group(1) : "";
-        pattern = Pattern.compile("<title>(.*)</title>", Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(body);
-        var title = matcher.find() ? matcher.group(1) : "";
-        pattern = Pattern.compile("<meta name=\"description\" content=\"(.*)\"", Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(body);
-        var description = matcher.find() ? matcher.group(1) : "";
-
+        var document = Jsoup.parse(body);
+        var title = document.title();
+        var h1 = document.selectFirst("h1") == null ? "" : document.selectFirst("h1").text();
+        var description = document.selectFirst("meta[name=description]") == null ? "" : document.selectFirst("meta[name=description]").attr("content");
         var check = new UrlCheck(status, title, h1, description, url.getId(), LocalDateTime.now());
         UrlCheckRepository.save(check);
         ctx.redirect(NamedRoutes.urlPath(urlId));

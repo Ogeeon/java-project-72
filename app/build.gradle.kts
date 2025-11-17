@@ -30,6 +30,7 @@ dependencies {
     implementation(libs.javalinBundle)
     implementation(libs.javalinRendering)
     implementation(libs.unirest)
+    implementation(libs.jsoup)
 
     testImplementation(libs.assertjCore)
     testImplementation(platform(libs.junitBom))
