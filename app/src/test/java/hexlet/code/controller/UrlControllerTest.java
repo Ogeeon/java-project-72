@@ -9,6 +9,7 @@ import hexlet.code.util.NamedRoutes;
 import mockwebserver3.MockResponse;
 import mockwebserver3.MockWebServer;
 import okhttp3.HttpUrl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +26,13 @@ class UrlControllerTest {
     private Javalin app;
 
     @BeforeEach
-    void setUp() throws IOException, SQLException {
+    void setup() throws IOException, SQLException {
         app = App.getApp();
         UrlRepository.removeAll();
+    }
+    @AfterEach
+    void cleanup() {
+        UrlRepository.getDataSource().close();
     }
 
     @Test
@@ -44,7 +49,7 @@ class UrlControllerTest {
     
     @Test
     void testMainPage() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var response = client.get("/");
             assertThat(response.code()).isEqualTo(200);
             var body = response.body();
@@ -55,7 +60,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlsPage() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var response = client.get("/urls");
             assertThat(response.code()).isEqualTo(200);
         });
@@ -63,7 +68,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlPage() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var url = new Url("https://ru.hexlet.io/");
             UrlRepository.save(url);
             var response = client.get("/urls/" + url.getId());
@@ -73,7 +78,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlNotFound() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var response = client.get("/urls/100");
             assertThat(response.code()).isEqualTo(404);
         });
@@ -81,116 +86,118 @@ class UrlControllerTest {
 
     @Test
     void testCreateAndDisplayUrl() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=https://example.com";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.priorResponse()).isNotNull();
-            assertThat(response.priorResponse().code()).isEqualTo(302);
-            assertThat(response.code()).isEqualTo(200);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("https://example.com");
+            try (var response = client.post("/urls", requestBody)) {
+                assertThat(response.priorResponse()).isNotNull();
+                assertThat(response.priorResponse().code()).isEqualTo(302);
+                assertThat(response.code()).isEqualTo(200);
+                var body = response.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("https://example.com");
 
-            response = client.get("/urls/1");
-            assertThat(response.code()).isEqualTo(200);
-            body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("https://example.com");
+                var response1 = client.get("/urls/1");
+                assertThat(response1.code()).isEqualTo(200);
+                body = response1.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("https://example.com");
+            }
         });
     }
 
     @Test
     void testCreateUrlFromMixedCase() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=HTTPS://EXAMple.COm";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.code()).isEqualTo(200);
-
+            try (var response = client.post("/urls", requestBody)) {
+                assertThat(response.code()).isEqualTo(200);
+            }
             var urls = UrlRepository.getEntities();
             assertThat(urls).hasSize(1);
-            assertThat(urls.get(0).getPageUrl()).isEqualTo("https://example.com");
+            assertThat(urls.getFirst().getPageUrl()).isEqualTo("https://example.com");
         });
     }
 
     @Test
     void testCreateUrlWithCustomPort() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=http://example.com:8080";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.code()).isEqualTo(200);
-
+            try (var response = client.post("/urls", requestBody)) {
+                assertThat(response.code()).isEqualTo(200);
+            }
             var urls = UrlRepository.getEntities();
             assertThat(urls).hasSize(1);
-            assertThat(urls.get(0).getPageUrl()).isEqualTo("http://example.com:8080");
+            assertThat(urls.getFirst().getPageUrl()).isEqualTo("http://example.com:8080");
         });
     }
 
     @Test
     void testIgnorePathAndQuery() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=https://example.com/path?query=value";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.code()).isEqualTo(200);
-
+            try (var response = client.post("/urls", requestBody)) {
+                assertThat(response.code()).isEqualTo(200);
+            }
             var urls = UrlRepository.getEntities();
             assertThat(urls).hasSize(1);
-            assertThat(urls.get(0).getPageUrl()).isEqualTo("https://example.com");
+            assertThat(urls.getFirst().getPageUrl()).isEqualTo("https://example.com");
         });
     }
 
     @Test
     void testCreateUrlWithWhitespace() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=  https://example.com  ";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.code()).isEqualTo(200);
-
+            try (var response = client.post("/urls", requestBody)) {
+                assertThat(response.code()).isEqualTo(200);
+            }
             var urls = UrlRepository.getEntities();
             assertThat(urls).hasSize(1);
-            assertThat(urls.get(0).getPageUrl()).isEqualTo("https://example.com");
+            assertThat(urls.getFirst().getPageUrl()).isEqualTo("https://example.com");
         });
     }
 
     @Test
     void testRejectInvalidUrl() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=chepukha";
-            var response = client.post("/urls", requestBody);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("Некорректный URL");
-
-            var urls = UrlRepository.getEntities();
-            assertThat(urls).isEmpty();
+            try (var response = client.post("/urls", requestBody)) {
+                var body = response.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("Некорректный URL");
+                var urls = UrlRepository.getEntities();
+                assertThat(urls).isEmpty();
+            }
         });
     }
 
     @Test
     void testRejectEmptyUrl() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=";
-            var response = client.post("/urls", requestBody);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("Некорректный URL");
-
-            var urls = UrlRepository.getEntities();
-            assertThat(urls).isEmpty();
+            try (var response = client.post("/urls", requestBody)) {
+                var body = response.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("Некорректный URL");
+                var urls = UrlRepository.getEntities();
+                assertThat(urls).isEmpty();
+            }
         });
     }
 
     @Test
     void testRejectDuplicateUrl() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var requestBody = "url=https://example.com";
-            var response1 = client.post("/urls", requestBody);
-            assertThat(response1.code()).isEqualTo(200);
-
-            var response2 = client.post("/urls", requestBody);
-            assertThat(response2.code()).isEqualTo(200);
-            var body = response2.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("Страница уже существует");
+            try (var response1 = client.post("/urls", requestBody)) {
+                assertThat(response1.code()).isEqualTo(200);
+            }
+            try (var response2 = client.post("/urls", requestBody)) {
+                assertThat(response2.code()).isEqualTo(200);
+                var body = response2.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("Страница уже существует");
+            }
 
             var urls = UrlRepository.getEntities();
             assertThat(urls).hasSize(1);
@@ -199,7 +206,7 @@ class UrlControllerTest {
 
     @Test
     void testIndexDisplaysAllUrls() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var url1 = new Url("https://example.com");
             var url2 = new Url("https://google.com");
             UrlRepository.save(url1);
@@ -217,7 +224,7 @@ class UrlControllerTest {
 
     @Test
     void testShowDisplaysUrl() {
-        JavalinTest.test(app, (server, client) -> {
+        JavalinTest.test(app, (_, client) -> {
             var url = new Url("https://hexlet.io");
             UrlRepository.save(url);
 
@@ -234,14 +241,15 @@ class UrlControllerTest {
 
     @Test
     void testShowNotFound() {
-        JavalinTest.test(app, (server, client) -> {
-            var response = client.get("/urls/999");
-            assertThat(response.code()).isEqualTo(404);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            var bodyString = body.string();
-            assertThat(bodyString).contains("999");
-            assertThat(bodyString).contains("не найдена");
+        JavalinTest.test(app, (_, client) -> {
+            try (var response = client.get("/urls/999")) {
+                assertThat(response.code()).isEqualTo(404);
+                var body = response.body();
+                assertThat(body).isNotNull();
+                var bodyString = body.string();
+                assertThat(bodyString).contains("999");
+                assertThat(bodyString).contains("не найдена");
+            }
         });
     }
 
@@ -256,12 +264,13 @@ class UrlControllerTest {
         var url = new Url(mockUrl.url().toString());
         UrlRepository.save(url);
 
-        JavalinTest.test(app, (javalinServer, client) -> {
-            var response = client.post(NamedRoutes.checkPath(url.getId()));
-            assertThat(response.code()).isEqualTo(200);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("mock response header");
+        JavalinTest.test(app, (_, client) -> {
+            try (var response = client.post(NamedRoutes.checkPath(url.getId()))) {
+                assertThat(response.code()).isEqualTo(200);
+                var body = response.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("mock response header");
+            }
         });
         server.close();
     }

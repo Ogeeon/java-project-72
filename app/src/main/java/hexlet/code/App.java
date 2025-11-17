@@ -63,6 +63,7 @@ public class App {
     public static Javalin getApp() throws IOException, SQLException {
         var hikariConfig = new HikariConfig();
         hikariConfig.setJdbcUrl(getJdbcUrl());
+        hikariConfig.setMaximumPoolSize(10);
 
         var dataSource = new HikariDataSource(hikariConfig);
         // There won't be this env variable locally. It can be set to "true" on Render if needed.
