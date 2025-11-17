@@ -252,20 +252,17 @@ class UrlControllerTest {
                 .body("<h1>mock response header</h1>")
                 .build());
         server.start();
-        try {
-            HttpUrl mockUrl = server.url("/");
-            var url = new Url(mockUrl.url().toString());
-            UrlRepository.save(url);
+        HttpUrl mockUrl = server.url("/");
+        var url = new Url(mockUrl.url().toString());
+        UrlRepository.save(url);
 
-            JavalinTest.test(app, (javalinServer, client) -> {
-                var response = client.post(NamedRoutes.checkPath(url.getId()));
-                assertThat(response.code()).isEqualTo(200);
-                var body = response.body();
-                assertThat(body).isNotNull();
-                assertThat(body.string()).contains("mock response header");
-            });
-        } finally {
-            server.close();
-        }
+        JavalinTest.test(app, (javalinServer, client) -> {
+            var response = client.post(NamedRoutes.checkPath(url.getId()));
+            assertThat(response.code()).isEqualTo(200);
+            var body = response.body();
+            assertThat(body).isNotNull();
+            assertThat(body.string()).contains("mock response header");
+        });
+        server.close();
     }
 }
