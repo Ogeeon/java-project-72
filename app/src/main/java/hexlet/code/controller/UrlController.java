@@ -73,13 +73,11 @@ public class UrlController {
             UrlRepository.save(urlObj);
             ctx.sessionAttribute(ATTR_FLASH, "Страница успешно добавлена");
             ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.SUCCESS);
-            log.debug("gonna redirect");
             ctx.redirect(NamedRoutes.urlsPath());
         }
     }
 
     public static void index(Context ctx) throws SQLException {
-        log.debug("in index");
         var urls = UrlRepository.getEntities();
         var page = new UrlsPage(urls);
         ctx.render(URLS_PAGE_JTE, model(

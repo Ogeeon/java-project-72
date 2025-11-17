@@ -35,8 +35,9 @@ dependencies {
     testImplementation(platform(libs.junitBom))
     testImplementation(libs.junitJupiter)
     testImplementation(libs.mockWebserver)
+    testImplementation(libs.okhttp)
+    
     testRuntimeOnly(libs.junitPlatformLauncher)
-
     testRuntimeOnly(libs.junitJupiterEngine)
 
     compileOnly(libs.lombok)

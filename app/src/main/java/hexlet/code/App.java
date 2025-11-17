@@ -55,11 +55,9 @@ public class App {
 
     public static void main(String[] args) throws IOException, SQLException {
         var app = getApp();
-        log.info("got app");
         var port = getPort();
-        log.info("got port");
+        log.info("Starting application with listening on port {}", port);
         app.start(port);
-        log.info("Application started, listening on port {}", port);
     }
 
     public static Javalin getApp() throws IOException, SQLException {
@@ -82,7 +80,6 @@ public class App {
         }
 
         BaseRepository.setDataSource(dataSource);
-
         var app = Javalin.create(config -> {
             config.bundledPlugins.enableDevLogging();
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
@@ -100,7 +97,6 @@ public class App {
         app.get(NamedRoutes.urlsPath(), UrlController::index);
         app.get(NamedRoutes.urlPath("{id}"), UrlController::show);
         app.post(NamedRoutes.checkPath("{id}"), UrlController::check);
-
         return app;
     }
 }

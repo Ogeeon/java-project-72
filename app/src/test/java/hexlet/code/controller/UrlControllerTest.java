@@ -17,7 +17,9 @@ import hexlet.code.model.Url;
 import hexlet.code.repository.UrlRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class UrlControllerTest {
 
     private Javalin app;
@@ -82,6 +84,8 @@ class UrlControllerTest {
         JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://example.com";
             var response = client.post("/urls", requestBody);
+            assertThat(response.priorResponse()).isNotNull();
+            assertThat(response.priorResponse().code()).isEqualTo(302);
             assertThat(response.code()).isEqualTo(200);
             var body = response.body();
             assertThat(body).isNotNull();
@@ -242,40 +246,26 @@ class UrlControllerTest {
     }
 
     @Test
-    void testConsumesFlashMessages() {
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=https://example.com";
-            var response = client.post("/urls", requestBody);
-            assertThat(response.code()).isEqualTo(200);
-            var body = response.body();
-            System.out.println("response body: " + body.string());
-            assertThat(body).isNotNull();
-//            assertThat(body.string()).contains("Страница успешно добавлена");
-//            response = client.get("/urls");
-//            body = response.body();
-//            assertThat(body).isNotNull();
-//            assertThat(body.string()).doesNotContain("Страница успешно добавлена");
-        });
-    }
-
-    @Test
-    void testCheck() {
+    void testCheck() throws Exception {
         MockWebServer server = new MockWebServer();
-        JavalinTest.test(app, (javalinServer, client) -> {
-            server.enqueue(new MockResponse.Builder()
-                    .body("<h1>mock response header</h1>")
-                    .build());
-            server.start();
+        server.enqueue(new MockResponse.Builder()
+                .body("<h1>mock response header</h1>")
+                .build());
+        server.start();
+        try {
             HttpUrl mockUrl = server.url("/");
             var url = new Url(mockUrl.url().toString());
             UrlRepository.save(url);
 
-            var response = client.post(NamedRoutes.checkPath(url.getId()));
-            assertThat(response.code()).isEqualTo(200);
-            var body = response.body();
-            assertThat(body).isNotNull();
-            assertThat(body.string()).contains("mock response header");
-        });
-        server.close();
+            JavalinTest.test(app, (javalinServer, client) -> {
+                var response = client.post(NamedRoutes.checkPath(url.getId()));
+                assertThat(response.code()).isEqualTo(200);
+                var body = response.body();
+                assertThat(body).isNotNull();
+                assertThat(body.string()).contains("mock response header");
+            });
+        } finally {
+            server.close();
+        }
     }
 }
