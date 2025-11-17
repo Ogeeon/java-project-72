@@ -69,7 +69,7 @@ public class App {
         if (System.getenv().getOrDefault("RECREATE_SCHEMA", "true").equalsIgnoreCase("true")) {
             var sql = readResourceFile("schema.sql");
             if (sql != null) {
-                log.info("Running recreate schema script:\n{}", sql);
+                log.info("Running recreate schema script");
                 try (var connection = dataSource.getConnection();
                      var statement = connection.createStatement()) {
                     statement.execute(sql);

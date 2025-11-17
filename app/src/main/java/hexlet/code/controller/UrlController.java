@@ -126,7 +126,7 @@ public class UrlController {
         var requestStr = Unirest.get(url.getPageUrl()).asString();
         var status = requestStr.getStatus();
         var body = requestStr.getBody();
-        Pattern pattern = Pattern.compile("<h1.+>(.*)</h1>", Pattern.CASE_INSENSITIVE);
+        Pattern pattern = Pattern.compile("<h1.*>(.*)</h1>", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(body);
         var h1 = matcher.find() ? matcher.group(1) : "";
         pattern = Pattern.compile("<title>(.*)</title>", Pattern.CASE_INSENSITIVE);
