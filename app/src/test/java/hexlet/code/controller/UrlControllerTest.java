@@ -49,7 +49,7 @@ class UrlControllerTest {
     
     @Test
     void testMainPage() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var response = client.get("/");
             assertThat(response.code()).isEqualTo(200);
             var body = response.body();
@@ -60,7 +60,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlsPage() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var response = client.get("/urls");
             assertThat(response.code()).isEqualTo(200);
         });
@@ -68,7 +68,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlPage() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var url = new Url("https://ru.hexlet.io/");
             UrlRepository.save(url);
             var response = client.get("/urls/" + url.getId());
@@ -78,7 +78,7 @@ class UrlControllerTest {
 
     @Test
     void testUrlNotFound() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var response = client.get("/urls/100");
             assertThat(response.code()).isEqualTo(404);
         });
@@ -86,7 +86,7 @@ class UrlControllerTest {
 
     @Test
     void testCreateAndDisplayUrl() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://example.com";
             try (var response = client.post("/urls", requestBody)) {
                 assertThat(response.priorResponse()).isNotNull();
@@ -107,7 +107,7 @@ class UrlControllerTest {
 
     @Test
     void testCreateUrlFromMixedCase() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=HTTPS://EXAMple.COm";
             try (var response = client.post("/urls", requestBody)) {
                 assertThat(response.code()).isEqualTo(200);
@@ -120,7 +120,7 @@ class UrlControllerTest {
 
     @Test
     void testCreateUrlWithCustomPort() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=http://example.com:8080";
             try (var response = client.post("/urls", requestBody)) {
                 assertThat(response.code()).isEqualTo(200);
@@ -133,7 +133,7 @@ class UrlControllerTest {
 
     @Test
     void testIgnorePathAndQuery() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://example.com/path?query=value";
             try (var response = client.post("/urls", requestBody)) {
                 assertThat(response.code()).isEqualTo(200);
@@ -146,7 +146,7 @@ class UrlControllerTest {
 
     @Test
     void testCreateUrlWithWhitespace() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=  https://example.com  ";
             try (var response = client.post("/urls", requestBody)) {
                 assertThat(response.code()).isEqualTo(200);
@@ -159,7 +159,7 @@ class UrlControllerTest {
 
     @Test
     void testRejectInvalidUrl() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=chepukha";
             try (var response = client.post("/urls", requestBody)) {
                 var body = response.body();
@@ -173,7 +173,7 @@ class UrlControllerTest {
 
     @Test
     void testRejectEmptyUrl() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=";
             try (var response = client.post("/urls", requestBody)) {
                 var body = response.body();
@@ -187,7 +187,7 @@ class UrlControllerTest {
 
     @Test
     void testRejectDuplicateUrl() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var requestBody = "url=https://example.com";
             try (var response1 = client.post("/urls", requestBody)) {
                 assertThat(response1.code()).isEqualTo(200);
@@ -206,7 +206,7 @@ class UrlControllerTest {
 
     @Test
     void testIndexDisplaysAllUrls() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var url1 = new Url("https://example.com");
             var url2 = new Url("https://google.com");
             UrlRepository.save(url1);
@@ -224,7 +224,7 @@ class UrlControllerTest {
 
     @Test
     void testShowDisplaysUrl() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var url = new Url("https://hexlet.io");
             UrlRepository.save(url);
 
@@ -241,7 +241,7 @@ class UrlControllerTest {
 
     @Test
     void testShowNotFound() {
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             try (var response = client.get("/urls/999")) {
                 assertThat(response.code()).isEqualTo(404);
                 var body = response.body();
@@ -264,7 +264,7 @@ class UrlControllerTest {
         var url = new Url(mockUrl.url().toString());
         UrlRepository.save(url);
 
-        JavalinTest.test(app, (_, client) -> {
+        JavalinTest.test(app, (javalinServer, client) -> {
             try (var response = client.post(NamedRoutes.checkPath(url.getId()))) {
                 assertThat(response.code()).isEqualTo(200);
                 var body = response.body();
