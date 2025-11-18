@@ -23,7 +23,7 @@
                 @for(var url: page.getUrls())
                 <tr>
                     <td>${url.getId()}</td>
-                    <td><a href="${NamedRoutes.urlPath(url.getId())}">${url.getPageUrl()}</a></td>
+                    <td><a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a></td>
                     <td>${url.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}</td>
                 </tr>
                 @endfor

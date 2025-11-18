@@ -9,15 +9,15 @@ import lombok.Setter;
 public class Url {
     @Setter
     private Long id;
-    private final String pageUrl;
+    private final String name;
     @Setter
     private LocalDateTime createdAt;
 
-    public Url(String pageUrl) {
-        this.pageUrl = pageUrl;
+    public Url(String name) {
+        this.name = name;
     }
-    public Url(String pageUrl, LocalDateTime createdAt) {
-        this.pageUrl = pageUrl;
+    public Url(String name, LocalDateTime createdAt) {
+        this.name = name;
         this.createdAt = createdAt;
     }
 }

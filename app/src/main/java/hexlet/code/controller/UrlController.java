@@ -5,8 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.MainPage;
@@ -51,8 +49,8 @@ public class UrlController {
 
     public static void create(Context ctx) throws SQLException {
         var urlParam  = ctx.formParam("url");
-        String pageUrl = getUrlFromString(urlParam);
-        if (pageUrl == null) {
+        String name = getUrlFromString(urlParam);
+        if (name == null) {
             var page = new MainPage();
             ctx.render(MAIN_PAGE_JTE, model(
                 "page", page,
@@ -62,7 +60,7 @@ public class UrlController {
             return;
         }
 
-        if (UrlRepository.pageUrlExists(pageUrl)) {
+        if (UrlRepository.nameExists(name)) {
             var page = new MainPage();
             ctx.render(MAIN_PAGE_JTE, model(
                 "page", page,
@@ -70,7 +68,7 @@ public class UrlController {
                 ATTR_FLASH_TYPE, FlashType.ERROR)
             );
         } else {
-            var urlObj = new Url(pageUrl);
+            var urlObj = new Url(name);
             UrlRepository.save(urlObj);
             ctx.sessionAttribute(ATTR_FLASH, "Страница успешно добавлена");
             ctx.sessionAttribute(ATTR_FLASH_TYPE, FlashType.SUCCESS);
@@ -124,7 +122,7 @@ public class UrlController {
             return;
         }
         var url = urlOpt.get();
-        var requestStr = Unirest.get(url.getPageUrl()).asString();
+        var requestStr = Unirest.get(url.getName()).asString();
         var status = requestStr.getStatus();
         var body = requestStr.getBody();
         var document = Jsoup.parse(body);

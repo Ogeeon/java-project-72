@@ -63,7 +63,7 @@ class UrlRepositoryTest {
         var found = UrlRepository.find(originalUrl.getId());
 
         assertThat(found).isPresent();
-        assertThat(found.get().getPageUrl()).isEqualTo("https://example.com");
+        assertThat(found.get().getName()).isEqualTo("https://example.com");
         assertThat(found.get().getId()).isEqualTo(originalUrl.getId());
     }
 
@@ -74,17 +74,17 @@ class UrlRepositoryTest {
     }
 
     @Test
-    void testPageUrlExistsForSavedUrl() throws SQLException {
+    void testNameExistsForSavedUrl() throws SQLException {
         var url = new Url("https://example.com");
         UrlRepository.save(url);
 
-        var exists = UrlRepository.pageUrlExists("https://example.com");
+        var exists = UrlRepository.nameExists("https://example.com");
         assertThat(exists).isTrue();
     }
 
     @Test
-    void testPageUrlExistsForNonExistentUrl() throws SQLException {
-        var exists = UrlRepository.pageUrlExists("https://nonexistent.com");
+    void testNameExistsForNonExistentUrl() throws SQLException {
+        var exists = UrlRepository.nameExists("https://nonexistent.com");
         assertThat(exists).isFalse();
     }
 
@@ -107,7 +107,7 @@ class UrlRepositoryTest {
         var urls = UrlRepository.getEntities();
 
         assertThat(urls).hasSize(3);
-        assertThat(urls).extracting(Url::getPageUrl)
+        assertThat(urls).extracting(Url::getName)
             .containsExactly("https://example.com", "https://google.com", "https://hexlet.io");
     }
 

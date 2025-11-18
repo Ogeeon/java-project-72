@@ -12,10 +12,10 @@ import hexlet.code.model.Url;
 
 public class UrlRepository extends BaseRepository {
     public static void save(Url url) throws SQLException {
-        var sql = "INSERT INTO urls (page_url, created_at) VALUES (?, ?)";
+        var sql = "INSERT INTO urls (name, created_at) VALUES (?, ?)";
         try (var conn = getDataSource().getConnection();
                 var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, url.getPageUrl());
+            stmt.setString(1, url.getName());
             var createdAt = LocalDateTime.now();
             stmt.setTimestamp(2, Timestamp.valueOf(createdAt));
 
@@ -31,16 +31,16 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static Optional<Url> find(Long id) throws SQLException {
-        var sql = "SELECT page_url, created_at FROM urls WHERE id = ?";
+        var sql = "SELECT name, created_at FROM urls WHERE id = ?";
         try (var conn = getDataSource().getConnection();
                 var stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, id);
             var resultSet = stmt.executeQuery();
             if (resultSet.next()) {
-                var pageUrl = resultSet.getString("page_url");
+                var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
 
-                var url = new Url(pageUrl, createdAt);
+                var url = new Url(name, createdAt);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
                 return Optional.of(url);
@@ -49,11 +49,11 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public static boolean pageUrlExists(String pageUrl) throws SQLException {
-        var sql = "SELECT count(page_url) cnt FROM urls WHERE page_url = ?";
+    public static boolean nameExists(String name) throws SQLException {
+        var sql = "SELECT count(name) cnt FROM urls WHERE name = ?";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, pageUrl);
+            stmt.setString(1, name);
             var resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 return resultSet.getInt("cnt") > 0;
@@ -63,14 +63,14 @@ public class UrlRepository extends BaseRepository {
     }
 
     public static List<Url> getEntities() throws SQLException {
-        var sql = "SELECT id, page_url, created_at FROM urls ORDER BY id";
+        var sql = "SELECT id, name, created_at FROM urls ORDER BY id";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
             var resultSet = stmt.executeQuery();
             var urls = new ArrayList<Url>();
             while (resultSet.next()) {
                 var id = resultSet.getLong("id");
-                var pageUrl = resultSet.getString("page_url");
+                var pageUrl = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
                 var url = new Url(pageUrl, createdAt);
                 url.setId(id);
