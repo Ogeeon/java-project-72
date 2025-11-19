@@ -13,7 +13,8 @@ import java.util.Map;
 
 public class UrlCheckRepository extends BaseRepository {
     public static void save(UrlCheck check) throws SQLException {
-        var sql = "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) VALUES (?, ?, ?, ?, ?, ?)";
+        var sql = "INSERT INTO url_checks (url_id, status_code, h1, title, description, created_at) "
+                + "VALUES (?, ?, ?, ?, ?, ?)";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setLong(1, check.getUrlId());
@@ -36,7 +37,8 @@ public class UrlCheckRepository extends BaseRepository {
     }
 
     public static List<UrlCheck> getEntitiesByUrlId(Long urlId) throws SQLException {
-        var sql = "SELECT id, status_code, h1, title, description, created_at FROM url_checks WHERE url_id=? ORDER BY id DESC";
+        var sql = "SELECT id, status_code, h1, title, description, created_at "
+                + "FROM url_checks WHERE url_id=? ORDER BY id DESC";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setLong(1, urlId);
@@ -58,12 +60,12 @@ public class UrlCheckRepository extends BaseRepository {
     }
 
     public static Map<Long, UrlCheck> getLatestChecks() throws SQLException {
-      var sql = "SELECT id, url_id, status_code, h1, title, description, created_at " +
-                "FROM (SELECT id, url_id, status_code, h1, title, description, created_at," +
-                "      ROW_NUMBER() OVER (PARTITION BY url_id ORDER BY created_at DESC, id DESC) AS rn" +
-                "      FROM url_checks" +
-                ") t " +
-                "WHERE t.rn = 1";
+        var sql = "SELECT id, url_id, status_code, h1, title, description, created_at "
+                + "FROM (SELECT id, url_id, status_code, h1, title, description, created_at,"
+                + "      ROW_NUMBER() OVER (PARTITION BY url_id ORDER BY created_at DESC, id DESC) AS rn"
+                + "      FROM url_checks"
+                + ") t "
+                + "WHERE t.rn = 1";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
             var resultSet = stmt.executeQuery();

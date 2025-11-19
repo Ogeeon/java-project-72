@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 
 @Slf4j
-public class UrlController {
+public final class UrlController {
     private static final String MAIN_PAGE_JTE = "index.jte";
     private static final String URLS_PAGE_JTE = "urls/index.jte";
     private static final String URL_PAGE_JTE = "urls/show.jte";

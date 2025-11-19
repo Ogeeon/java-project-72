@@ -46,7 +46,7 @@ class UrlControllerTest {
                 .hasMessage("Utility class");
         }
     }
-    
+
     @Test
     void testMainPage() {
         JavalinTest.test(app, (server, client) -> {

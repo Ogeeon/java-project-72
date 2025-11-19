@@ -1,7 +1,7 @@
 package hexlet.code.util;
 
 public final class Flash {
-    private Flash() {}
+    private Flash() { }
 
     public static String bootstrapClass(FlashType type) {
         if (type == null) {

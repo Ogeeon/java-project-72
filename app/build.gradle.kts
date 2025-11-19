@@ -4,6 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     application
     jacoco
+    checkstyle
     alias(libs.plugins.benManes)
     alias(libs.plugins.sonarqube)
     alias(libs.plugins.shadow)
