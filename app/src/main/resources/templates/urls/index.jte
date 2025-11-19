@@ -16,7 +16,8 @@
                     <tr>
                         <th>ID</th>
                         <th>Имя</th>
-                        <th>Добавлено</th>
+                        <th>Последняя проверка</th>
+                        <th>Код ответа</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,7 +25,10 @@
                 <tr>
                     <td>${url.getId()}</td>
                     <td><a href="${NamedRoutes.urlPath(url.getId())}">${url.getName()}</a></td>
-                    <td>${url.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}</td>
+                    !{ var lastCheck = page.getChecks().get(url.getId()); }
+                    <td>${lastCheck == null ? "" : lastCheck.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))}</td>
+                    <td>${lastCheck == null ? "" : String.valueOf(lastCheck.getStatusCode())}</td>
+
                 </tr>
                 @endfor
                 </tbody>

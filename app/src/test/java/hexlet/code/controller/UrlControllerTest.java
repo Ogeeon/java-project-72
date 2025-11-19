@@ -270,6 +270,11 @@ class UrlControllerTest {
                 var body = response.body();
                 assertThat(body).isNotNull();
                 assertThat(body.string()).contains("mock response header");
+                var response1 = client.get("/urls");
+                body = response1.body();
+                assertThat(body).isNotNull();
+                var bodyString = body.string();
+                assertThat(bodyString).contains("200");
             }
         });
         server.close();

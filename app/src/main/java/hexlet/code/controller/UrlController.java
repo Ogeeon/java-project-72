@@ -78,7 +78,8 @@ public class UrlController {
 
     public static void index(Context ctx) throws SQLException {
         var urls = UrlRepository.getEntities();
-        var page = new UrlsPage(urls);
+        var checks = UrlCheckRepository.getLatestChecks();
+        var page = new UrlsPage(urls, checks);
         ctx.render(URLS_PAGE_JTE, model(
             "page", page,
             ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
@@ -127,8 +128,10 @@ public class UrlController {
         var body = requestStr.getBody();
         var document = Jsoup.parse(body);
         var title = document.title();
-        var h1 = document.selectFirst("h1") == null ? "" : document.selectFirst("h1").text();
-        var description = document.selectFirst("meta[name=description]") == null ? "" : document.selectFirst("meta[name=description]").attr("content");
+        var h1Element = document.selectFirst("h1");
+        var h1 = h1Element == null ? "" : h1Element.text();
+        var decsrElement = document.selectFirst("meta[name=description]");
+        var description = decsrElement == null ? "" : decsrElement.attr("content");
         var check = new UrlCheck(status, title, h1, description, url.getId(), LocalDateTime.now());
         UrlCheckRepository.save(check);
         ctx.redirect(NamedRoutes.urlPath(urlId));

@@ -7,7 +7,9 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UrlCheckRepository extends BaseRepository {
     public static void save(UrlCheck check) throws SQLException {
@@ -50,6 +52,33 @@ public class UrlCheckRepository extends BaseRepository {
                 var check = new UrlCheck(statusCode, title, h1, description, urlId, createdAt);
                 check.setId(id);
                 checks.add(check);
+            }
+            return checks;
+        }
+    }
+
+    public static Map<Long, UrlCheck> getLatestChecks() throws SQLException {
+      var sql = "SELECT id, url_id, status_code, h1, title, description, created_at " +
+                "FROM (SELECT id, url_id, status_code, h1, title, description, created_at," +
+                "      ROW_NUMBER() OVER (PARTITION BY url_id ORDER BY created_at DESC, id DESC) AS rn" +
+                "      FROM url_checks" +
+                ") t " +
+                "WHERE t.rn = 1";
+        try (var conn = getDataSource().getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            var resultSet = stmt.executeQuery();
+            var checks = new HashMap<Long, UrlCheck>();
+            while (resultSet.next()) {
+                var id = resultSet.getLong("id");
+                var urlId = resultSet.getLong("url_id");
+                var statusCode = resultSet.getInt("status_code");
+                var h1 = resultSet.getString("h1");
+                var title = resultSet.getString("title");
+                var description = resultSet.getString("description");
+                var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
+                var check = new UrlCheck(statusCode, title, h1, description, urlId, createdAt);
+                check.setId(id);
+                checks.put(urlId, check);
             }
             return checks;
         }
