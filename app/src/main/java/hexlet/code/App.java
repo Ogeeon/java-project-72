@@ -44,7 +44,7 @@ public class App {
             }
         } else {
             log.error("Failed to access {}", fileName);
-            return null;
+            return "";
         }
     }
 
@@ -70,7 +70,7 @@ public class App {
         // There won't be this env variable locally. It can be set to "true" on Render if needed.
         if (System.getenv().getOrDefault("RECREATE_SCHEMA", "true").equalsIgnoreCase("true")) {
             var sql = readResourceFile("schema.sql");
-            if (sql != null) {
+            if (!sql.isEmpty()) {
                 log.info("Running recreate schema script");
                 try (var connection = dataSource.getConnection();
                      var statement = connection.createStatement()) {

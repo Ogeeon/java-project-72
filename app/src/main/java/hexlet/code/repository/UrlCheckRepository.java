@@ -51,8 +51,9 @@ public class UrlCheckRepository extends BaseRepository {
                 var title = resultSet.getString("title");
                 var description = resultSet.getString("description");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
-                var check = new UrlCheck(statusCode, title, h1, description, urlId, createdAt);
+                var check = new UrlCheck(statusCode, title, h1, description, urlId);
                 check.setId(id);
+                check.setCreatedAt(createdAt);
                 checks.add(check);
             }
             return checks;
@@ -78,8 +79,9 @@ public class UrlCheckRepository extends BaseRepository {
                 var title = resultSet.getString("title");
                 var description = resultSet.getString("description");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
-                var check = new UrlCheck(statusCode, title, h1, description, urlId, createdAt);
+                var check = new UrlCheck(statusCode, title, h1, description, urlId);
                 check.setId(id);
+                check.setCreatedAt(createdAt);
                 checks.put(urlId, check);
             }
             return checks;

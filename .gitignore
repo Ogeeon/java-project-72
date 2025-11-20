@@ -11,3 +11,4 @@ app/jte-classes
 app/.vscode
 app/.sonarlint/connectedMode.json
 app/.github
+app/bin

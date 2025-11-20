@@ -257,7 +257,9 @@ class UrlControllerTest {
     void testCheck() throws Exception {
         MockWebServer server = new MockWebServer();
         server.enqueue(new MockResponse.Builder()
-                .body("<h1>mock response header</h1>")
+                .body("<meta name=\"description\" content=\"mock description\">"
+                    + "<title>mock title</title>"
+                    + "<h1>mock response header</h1>")
                 .build());
         server.start();
         HttpUrl mockUrl = server.url("/");
@@ -269,11 +271,14 @@ class UrlControllerTest {
                 assertThat(response.code()).isEqualTo(200);
                 var body = response.body();
                 assertThat(body).isNotNull();
-                assertThat(body.string()).contains("mock response header");
+                String bodyString = body.string();
+                assertThat(bodyString).contains("mock description");
+                assertThat(bodyString).contains("mock title");
+                assertThat(bodyString).contains("mock response header");
                 var response1 = client.get("/urls");
                 body = response1.body();
                 assertThat(body).isNotNull();
-                var bodyString = body.string();
+                bodyString = body.string();
                 assertThat(bodyString).contains("200");
             }
         });

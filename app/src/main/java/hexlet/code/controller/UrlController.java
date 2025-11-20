@@ -3,6 +3,7 @@ package hexlet.code.controller;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 
@@ -36,21 +37,24 @@ public final class UrlController {
     }
 
     private static String getUrlFromString(String input) {
+        URL urlObj = null;
         try {
-            var urlObj = (new URI(input.trim())).toURL();
-            return String.format("%s://%s%s", urlObj.getProtocol(),
-                    urlObj.getHost().toLowerCase(),
-                    (urlObj.getPort() == -1 ? "" : ":" + urlObj.getPort()));
+            urlObj = (new URI(input.trim().toLowerCase())).toURL();
         } catch (NullPointerException | MalformedURLException | URISyntaxException | IllegalArgumentException e) {
             log.info("Incorrect url passed: {}", input);
-            return null;
+            return "";
         }
+        return String.format(
+            "%s://%s%s",
+            urlObj.getProtocol(),
+            urlObj.getHost(),
+            (urlObj.getPort() == -1 ? "" : ":" + urlObj.getPort()));
     }
 
     public static void create(Context ctx) throws SQLException {
         var urlParam  = ctx.formParam("url");
         String name = getUrlFromString(urlParam);
-        if (name == null) {
+        if (name.isEmpty()) {
             var page = new MainPage();
             ctx.render(MAIN_PAGE_JTE, model(
                 "page", page,
@@ -87,9 +91,7 @@ public final class UrlController {
         ));
     }
 
-    public static void show(Context ctx) throws SQLException {
-        var urlOpt = UrlRepository.find(Long.valueOf(ctx.pathParam("id")));
-        if (urlOpt.isEmpty()) {
+    private static void renderNotFound(Context ctx) {
             var page = new BasePage();
             ctx.status(404);
             ctx.render("layout/page.jte", model(
@@ -97,10 +99,17 @@ public final class UrlController {
                 ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
                 ATTR_FLASH_TYPE, FlashType.ERROR
             ));
+    }
+
+    public static void show(Context ctx) throws SQLException {
+        var url = UrlRepository.find(Long.valueOf(ctx.pathParam("id"))).orElse(null);
+        if (url == null) {
+            renderNotFound(ctx);
             return;
         }
-        var checks = UrlCheckRepository.getEntitiesByUrlId(urlOpt.get().getId());
-        var page = new UrlPage(urlOpt.get(), checks);
+        
+        var checks = UrlCheckRepository.getEntitiesByUrlId(url.getId());
+        var page = new UrlPage(url, checks);
         ctx.render(URL_PAGE_JTE, model(
             "page", page,
             ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
@@ -110,30 +119,27 @@ public final class UrlController {
     }
 
     public static void check(Context ctx) throws SQLException {
-        var urlId = Long.valueOf(ctx.pathParam("id"));
-        var urlOpt = UrlRepository.find(urlId);
-        if (urlOpt.isEmpty()) {
-            var page = new BasePage();
-            ctx.status(404);
-            ctx.render("layout/page.jte", model(
-                    "page", page,
-                    ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
-                    ATTR_FLASH_TYPE, FlashType.ERROR
-            ));
+        var url = UrlRepository.find(Long.valueOf(ctx.pathParam("id"))).orElse(null);
+        if (url == null) {
+            renderNotFound(ctx);
             return;
         }
-        var url = urlOpt.get();
-        var requestStr = Unirest.get(url.getName()).asString();
-        var status = requestStr.getStatus();
-        var body = requestStr.getBody();
-        var document = Jsoup.parse(body);
-        var title = document.title();
-        var h1Element = document.selectFirst("h1");
-        var h1 = h1Element == null ? "" : h1Element.text();
-        var decsrElement = document.selectFirst("meta[name=description]");
-        var description = decsrElement == null ? "" : decsrElement.attr("content");
-        var check = new UrlCheck(status, title, h1, description, url.getId(), LocalDateTime.now());
-        UrlCheckRepository.save(check);
-        ctx.redirect(NamedRoutes.urlPath(urlId));
+        
+        try {
+            var requestStr = Unirest.get(url.getName()).asString();
+            var status = requestStr.getStatus();
+            var body = requestStr.getBody();
+            var document = Jsoup.parse(body);
+            var title = document.title();
+            var h1Element = document.selectFirst("h1");
+            var h1 = h1Element == null ? "" : h1Element.text();
+            var decsrElement = document.selectFirst("meta[name=description]");
+            var description = decsrElement == null ? "" : decsrElement.attr("content");
+            var check = new UrlCheck(status, title, h1, description, url.getId());
+            UrlCheckRepository.save(check);
+        } catch (SQLException e) {
+            throw e;
+        }
+        ctx.redirect(NamedRoutes.urlPath(url.getId()));
     }
 }

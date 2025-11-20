@@ -24,7 +24,7 @@ class AppTest {
         var method = App.class.getDeclaredMethod("readResourceFile", String.class);
         method.setAccessible(true);
         var content = (String) method.invoke(null, "nonexistent-file.txt");
-        assertThat(content).isNull();
+        assertThat(content).isEmpty();
     }
 
     @Test
