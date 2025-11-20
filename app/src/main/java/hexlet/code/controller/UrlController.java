@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
 
 import hexlet.code.dto.BasePage;
 import hexlet.code.dto.MainPage;
@@ -92,13 +91,13 @@ public final class UrlController {
     }
 
     private static void renderNotFound(Context ctx) {
-            var page = new BasePage();
-            ctx.status(404);
-            ctx.render("layout/page.jte", model(
-                "page", page,
-                ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
-                ATTR_FLASH_TYPE, FlashType.ERROR
-            ));
+        var page = new BasePage();
+        ctx.status(404);
+        ctx.render("layout/page.jte", model(
+            "page", page,
+            ATTR_FLASH, "Страница с id = " + ctx.pathParam("id") + " не найдена",
+            ATTR_FLASH_TYPE, FlashType.ERROR
+        ));
     }
 
     public static void show(Context ctx) throws SQLException {
@@ -107,7 +106,7 @@ public final class UrlController {
             renderNotFound(ctx);
             return;
         }
-        
+
         var checks = UrlCheckRepository.getEntitiesByUrlId(url.getId());
         var page = new UrlPage(url, checks);
         ctx.render(URL_PAGE_JTE, model(
@@ -124,7 +123,7 @@ public final class UrlController {
             renderNotFound(ctx);
             return;
         }
-        
+
         try {
             var requestStr = Unirest.get(url.getName()).asString();
             var status = requestStr.getStatus();
