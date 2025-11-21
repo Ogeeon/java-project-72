@@ -39,8 +39,7 @@ public class UrlRepository extends BaseRepository {
             if (resultSet.next()) {
                 var name = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
-
-                var url = new Url(name, createdAt);
+                var url = new Url(name);
                 url.setId(id);
                 url.setCreatedAt(createdAt);
                 return Optional.of(url);
@@ -49,16 +48,21 @@ public class UrlRepository extends BaseRepository {
         }
     }
 
-    public static boolean nameExists(String name) throws SQLException {
-        var sql = "SELECT count(name) cnt FROM urls WHERE name = ?";
+    public static Optional<Url> findByName(String name) throws SQLException {
+        var sql = "SELECT id, created_at FROM urls WHERE name = ?";
         try (var conn = getDataSource().getConnection();
              var stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, name);
             var resultSet = stmt.executeQuery();
             if (resultSet.next()) {
-                return resultSet.getInt("cnt") > 0;
+                var id = resultSet.getLong("id");
+                var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
+                var url = new Url(name);
+                url.setId(id);
+                url.setCreatedAt(createdAt);
+                return Optional.of(url);
             }
-            return false;
+            return Optional.empty();
         }
     }
 
@@ -72,8 +76,9 @@ public class UrlRepository extends BaseRepository {
                 var id = resultSet.getLong("id");
                 var pageUrl = resultSet.getString("name");
                 var createdAt = resultSet.getTimestamp("created_at").toLocalDateTime();
-                var url = new Url(pageUrl, createdAt);
+                var url = new Url(pageUrl);
                 url.setId(id);
+                url.setCreatedAt(createdAt);
                 urls.add(url);
             }
             return urls;

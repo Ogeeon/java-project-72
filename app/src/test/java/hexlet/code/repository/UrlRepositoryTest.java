@@ -78,14 +78,14 @@ class UrlRepositoryTest {
         var url = new Url("https://example.com");
         UrlRepository.save(url);
 
-        var exists = UrlRepository.nameExists("https://example.com");
-        assertThat(exists).isTrue();
+        var exists = UrlRepository.findByName("https://example.com");
+        assertThat(exists).isPresent();
     }
 
     @Test
     void testNameExistsForNonExistentUrl() throws SQLException {
-        var exists = UrlRepository.nameExists("https://nonexistent.com");
-        assertThat(exists).isFalse();
+        var exists = UrlRepository.findByName("https://nonexistent.com");
+        assertThat(exists).isEmpty();
     }
 
     @Test

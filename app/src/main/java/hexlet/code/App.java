@@ -14,10 +14,13 @@ import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
 import hexlet.code.controller.UrlController;
+import hexlet.code.dto.BasePage;
 import hexlet.code.dto.MainPage;
 import hexlet.code.repository.BaseRepository;
+import hexlet.code.util.FlashType;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
+import io.javalin.http.NotFoundResponse;
 import io.javalin.rendering.template.JavalinJte;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +28,8 @@ import static io.javalin.rendering.template.TemplateUtil.model;
 
 @Slf4j
 public class App {
+    private static final String ATTR_FLASH = "flash";
+    private static final String ATTR_FLASH_TYPE = "flashType";
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
@@ -91,14 +96,32 @@ public class App {
             var page = new MainPage();
             ctx.render("index.jte", model(
                 "page", page,
-                "flash", ctx.consumeSessionAttribute("flash"),
-                "flashType", ctx.consumeSessionAttribute("flashType")
+                ATTR_FLASH, ctx.consumeSessionAttribute(ATTR_FLASH),
+                ATTR_FLASH_TYPE, ctx.consumeSessionAttribute(ATTR_FLASH_TYPE)
             ));
         });
         app.post(NamedRoutes.urlsPath(), UrlController::create);
         app.get(NamedRoutes.urlsPath(), UrlController::index);
         app.get(NamedRoutes.urlPath("{id}"), UrlController::show);
         app.post(NamedRoutes.checkPath("{id}"), UrlController::check);
+        app.exception(NotFoundResponse.class, (e, ctx) -> {
+            var page = new BasePage();
+            ctx.status(404);
+            ctx.render("layout/page.jte", model(
+                    "page", page,
+                    ATTR_FLASH, e.getMessage(),
+                    ATTR_FLASH_TYPE, FlashType.ERROR
+            ));
+        });
+        app.exception(SQLException.class, (e, ctx) -> {
+            var page = new BasePage();
+            ctx.status(500);
+            ctx.render("layout/page.jte", model(
+                    "page", page,
+                    ATTR_FLASH, e.getMessage(),
+                    ATTR_FLASH_TYPE, FlashType.ERROR
+            ));
+        });
         return app;
     }
 }

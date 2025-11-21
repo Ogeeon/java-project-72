@@ -36,14 +36,14 @@
         </div>
     </div>
 </nav>
-<div class="container mt-3">
-    @if(flash != null)
+@if(flash != null)
+    <div class="container mt-3">
         <div class="alert ${Flash.bootstrapClass(flashType)} alert-dismissible fade show" role="alert">
             <p>${flash}</p>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
-</div>
+    </div>
+@endif
 ${content}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
