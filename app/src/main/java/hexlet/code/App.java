@@ -20,6 +20,7 @@ import hexlet.code.repository.BaseRepository;
 import hexlet.code.util.FlashType;
 import hexlet.code.util.NamedRoutes;
 import io.javalin.Javalin;
+import io.javalin.http.HttpStatus;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.rendering.template.JavalinJte;
 import lombok.extern.slf4j.Slf4j;
@@ -106,7 +107,7 @@ public class App {
         app.post(NamedRoutes.checkPath("{id}"), UrlController::check);
         app.exception(NotFoundResponse.class, (e, ctx) -> {
             var page = new BasePage();
-            ctx.status(404);
+            ctx.status(HttpStatus.NOT_FOUND);
             ctx.render("layout/page.jte", model(
                     "page", page,
                     ATTR_FLASH, e.getMessage(),
@@ -115,7 +116,7 @@ public class App {
         });
         app.exception(SQLException.class, (e, ctx) -> {
             var page = new BasePage();
-            ctx.status(500);
+            ctx.status(HttpStatus.INTERNAL_SERVER_ERROR);
             ctx.render("layout/page.jte", model(
                     "page", page,
                     ATTR_FLASH, e.getMessage(),

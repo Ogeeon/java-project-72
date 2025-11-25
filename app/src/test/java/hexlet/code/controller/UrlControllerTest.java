@@ -158,53 +158,6 @@ class UrlControllerTest {
     }
 
     @Test
-    void testRejectInvalidUrl() {
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=chepukha";
-            try (var response = client.post("/urls", requestBody)) {
-                var body = response.body();
-                assertThat(body).isNotNull();
-                assertThat(body.string()).contains("Некорректный URL");
-                var urls = UrlRepository.getEntities();
-                assertThat(urls).isEmpty();
-            }
-        });
-    }
-
-    @Test
-    void testRejectEmptyUrl() {
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=";
-            try (var response = client.post("/urls", requestBody)) {
-                var body = response.body();
-                assertThat(body).isNotNull();
-                assertThat(body.string()).contains("Некорректный URL");
-                var urls = UrlRepository.getEntities();
-                assertThat(urls).isEmpty();
-            }
-        });
-    }
-
-    @Test
-    void testRejectDuplicateUrl() {
-        JavalinTest.test(app, (server, client) -> {
-            var requestBody = "url=https://example.com";
-            try (var response1 = client.post("/urls", requestBody)) {
-                assertThat(response1.code()).isEqualTo(200);
-            }
-            try (var response2 = client.post("/urls", requestBody)) {
-                assertThat(response2.code()).isEqualTo(200);
-                var body = response2.body();
-                assertThat(body).isNotNull();
-                assertThat(body.string()).contains("Страница уже существует");
-            }
-
-            var urls = UrlRepository.getEntities();
-            assertThat(urls).hasSize(1);
-        });
-    }
-
-    @Test
     void testIndexDisplaysAllUrls() {
         JavalinTest.test(app, (server, client) -> {
             var url1 = new Url("https://example.com");

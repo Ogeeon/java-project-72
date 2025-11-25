@@ -20,4 +20,5 @@ EXPOSE 7070
 RUN ./gradlew installDist
 
 USER nonroot
-CMD ["./build/install/app/bin/app"]
+#CMD ["./build/install/app/bin/app"]
+CMD ["/app/build/install/app/bin/app"]
