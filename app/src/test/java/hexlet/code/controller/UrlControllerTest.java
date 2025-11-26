@@ -96,7 +96,9 @@ class UrlControllerTest {
                 assertThat(body).isNotNull();
                 assertThat(body.string()).contains("https://example.com");
 
-                var response1 = client.get("/urls/1");
+                var entities = UrlRepository.getEntities();
+                var url = entities.getLast();
+                var response1 = client.get("/urls/" + url.getId());
                 assertThat(response1.code()).isEqualTo(200);
                 body = response1.body();
                 assertThat(body).isNotNull();
