@@ -1,24 +1,30 @@
-FROM gradle:8.12.1-jdk21
+# ============================
+# 1. BUILD STAGE
+# ============================
+FROM gradle:8-jdk17 AS builder
 
-RUN groupadd -r nonroot && useradd -r -g nonroot nonroot
+# Create working dir
+WORKDIR /app
+
+# Copy everything (Gradle files, wrapper, src/, config/, etc.)
+COPY . .
+
+# Build using installDist so we get /build/install/app/
+RUN gradle installDist --no-daemon
+
+
+# ============================
+# 2. RUNTIME STAGE
+# ============================
+FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
-RUN chown -R nonroot:nonroot /app
 
-COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
-COPY gradlew .
+# Copy only the built output from the builder stage
+COPY --from=builder /app/build/install/app /app
 
-RUN ./gradlew dependencies
-
-COPY src src
-COPY config config
-
+# Expose port if you want (optional)
 EXPOSE 7070
 
-RUN ./gradlew installDist
-
-USER nonroot
-#CMD ["./build/install/app/bin/app"]
-CMD ["/app/build/install/app/bin/app"]
+# Start the application
+CMD ["/app/bin/app"]
